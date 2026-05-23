@@ -504,6 +504,44 @@ img{display:block;max-width:100%}
   border-radius:6px;
 }
 .gallery-item:hover::after{opacity:1}
+/* Video clip items */
+.gallery-item.is-video::after{display:none}
+.gallery-item.is-video .video-thumb-wrap{
+  position:relative;
+  width:100%;
+  background:#000;
+  border-radius:6px;
+  overflow:hidden;
+  aspect-ratio:16/9;
+}
+.gallery-item.is-video img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform .4s ease,filter .3s ease;
+}
+.gallery-item.is-video:hover img{transform:scale(1.03);filter:brightness(.7)}
+.video-play-overlay{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;
+  background:rgba(0,0,0,.35);
+  transition:background .3s ease;
+  border-radius:6px;
+}
+.gallery-item.is-video:hover .video-play-overlay{background:rgba(0,0,0,.55)}
+.video-play-btn{
+  width:52px;height:52px;border-radius:50%;
+  background:rgba(229,9,20,.9);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+  transition:transform .3s ease,background .3s ease;
+  box-shadow:0 4px 20px rgba(0,0,0,.5);
+}
+.gallery-item.is-video:hover .video-play-btn{transform:scale(1.1);background:var(--red)}
+.video-clip-label{
+  font-size:11px;font-weight:700;letter-spacing:1.5px;
+  color:rgba(255,255,255,.9);text-transform:uppercase;
+  background:rgba(229,9,20,.8);padding:3px 10px;border-radius:20px;
+}
 @media(max-width:900px){.gallery-grid{columns:2}}
 @media(max-width:500px){.gallery-grid{columns:1}}
 
@@ -516,12 +554,24 @@ img{display:block;max-width:100%}
   align-items:center;justify-content:center;
 }
 #lightbox.open{display:flex;animation:fadeIn .2s ease}
+#lightbox-media{
+  display:flex;align-items:center;justify-content:center;
+  max-width:92vw;max-height:88vh;
+}
 .lightbox-img{
   max-width:92vw;max-height:88vh;
   border-radius:4px;object-fit:contain;
   box-shadow:0 0 80px rgba(0,0,0,.8);
   user-select:none;-webkit-user-drag:none;
 }
+.lightbox-video-wrap{
+  width:min(92vw, 160vh);
+  aspect-ratio:16/9;
+  border-radius:6px;overflow:hidden;
+  box-shadow:0 0 80px rgba(0,0,0,.8);
+  background:#000;
+}
+.lightbox-video-wrap iframe{width:100%;height:100%;border:none}
 .lightbox-close{
   position:fixed;top:20px;right:24px;
   font-size:28px;color:var(--white);cursor:pointer;
@@ -1033,7 +1083,9 @@ select.form-input option{background:var(--bg2);color:var(--white)}
 <div id="lightbox">
   <span class="lightbox-close" onclick="closeLightbox()">✕</span>
   <span class="lightbox-arrow left" onclick="lightboxPrev()">‹</span>
-  <img id="lightbox-img" class="lightbox-img" src="" alt="">
+  <div id="lightbox-media">
+    <img id="lightbox-img" class="lightbox-img" src="" alt="">
+  </div>
   <span class="lightbox-arrow right" onclick="lightboxNext()">›</span>
   <div class="lightbox-counter" id="lightbox-counter"></div>
 </div>
@@ -1675,10 +1727,11 @@ function renderDetail(item) {
   const posterUrl = item.poster ? getRawURL(item.poster) : '';
   const year = item.date ? item.date.slice(0,4) : '';
   const isSeries = item.type === 'series';
-  const photos = (item.photos || []).map(p => getRawURL(p));
-
-  // Store for lightbox
-  state.lightboxPhotos = photos;
+  // Build mixed media array for gallery — photos + clips
+  const photoItems = (item.photos || []).map(p => ({ type: 'photo', url: getRawURL(p) }));
+  const clipItems  = (item.clips  || []).map(c => ({ type: 'video', url: c.url || c, title: c.title || '' }));
+  const allMedia = [...photoItems, ...clipItems];
+  state.lightboxPhotos = allMedia;
 
   // First episode video (default)
   const videoUrl = isSeries
@@ -1741,14 +1794,30 @@ function renderDetail(item) {
         }
       </div>
 
-      ${photos.length > 0 ? `
+      ${allMedia.length > 0 ? `
         <div class="section-title">📷 Gallery</div>
         <div class="gallery-grid">
-          ${photos.map((ph, i) => `
-            <div class="gallery-item" onclick="openLightbox(${i})">
-              <img src="${ph}" alt="Photo ${i+1}" loading="lazy">
-            </div>
-          `).join('')}
+          ${allMedia.map((m, i) => {
+            if (m.type === 'video') {
+              const ytId = extractYoutubeId(m.url);
+              const thumb = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+              return `
+                <div class="gallery-item is-video" onclick="openLightbox(${i})">
+                  <div class="video-thumb-wrap">
+                    <img src="${thumb}" alt="Video clip" loading="lazy">
+                    <div class="video-play-overlay">
+                      <div class="video-play-btn">▶</div>
+                      <span class="video-clip-label">${m.title || 'Clip'}</span>
+                    </div>
+                  </div>
+                </div>`;
+            } else {
+              return `
+                <div class="gallery-item" onclick="openLightbox(${i})">
+                  <img src="${m.url}" alt="Photo ${i+1}" loading="lazy">
+                </div>`;
+            }
+          }).join('')}
         </div>
       ` : ''}
     </div>
@@ -1788,23 +1857,43 @@ function openLightbox(idx) {
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
   document.body.style.overflow = '';
+  // Stop video if playing
+  document.getElementById('lightbox-media').innerHTML =
+    '<img id="lightbox-img" class="lightbox-img" src="" alt="">';
 }
 
 function updateLightbox() {
-  const photos = state.lightboxPhotos;
-  const img = document.getElementById('lightbox-img');
+  const media = state.lightboxPhotos;
+  const item = media[state.lightboxIdx];
   const counter = document.getElementById('lightbox-counter');
-  img.src = photos[state.lightboxIdx] || '';
-  counter.textContent = `${state.lightboxIdx + 1} / ${photos.length}`;
+  const wrap = document.getElementById('lightbox-media');
+  counter.textContent = `${state.lightboxIdx + 1} / ${media.length}`;
   document.querySelector('.lightbox-arrow.left').style.opacity = state.lightboxIdx > 0 ? '1' : '0.3';
-  document.querySelector('.lightbox-arrow.right').style.opacity = state.lightboxIdx < photos.length - 1 ? '1' : '0.3';
+  document.querySelector('.lightbox-arrow.right').style.opacity = state.lightboxIdx < media.length - 1 ? '1' : '0.3';
+
+  if (item && item.type === 'video') {
+    wrap.innerHTML = `
+      <div class="lightbox-video-wrap">
+        <iframe src="${buildYoutubeEmbed(item.url)}?autoplay=1"
+          allowfullscreen allow="autoplay; encrypted-media"></iframe>
+      </div>`;
+  } else {
+    const src = item ? (item.url || item) : '';
+    wrap.innerHTML = `<img id="lightbox-img" class="lightbox-img" src="${src}" alt="">`;
+  }
 }
 
 function lightboxNext() {
-  if (state.lightboxIdx < state.lightboxPhotos.length - 1) { state.lightboxIdx++; updateLightbox(); }
+  if (state.lightboxIdx < state.lightboxPhotos.length - 1) {
+    state.lightboxIdx++;
+    updateLightbox();
+  }
 }
 function lightboxPrev() {
-  if (state.lightboxIdx > 0) { state.lightboxIdx--; updateLightbox(); }
+  if (state.lightboxIdx > 0) {
+    state.lightboxIdx--;
+    updateLightbox();
+  }
 }
 
 // Keyboard & swipe support
@@ -1995,6 +2084,15 @@ function openContentForm(type, editId) {
           <div class="progress-text" id="gallery-progress-text">Uploading...</div>
         </div>
       </div>
+
+      <div class="form-group full">
+        <label class="form-label">🎬 Video clips in gallery (YouTube URLs)</label>
+        <div id="clips-editor" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px">
+          ${(item?.clips || []).map((c,i) => buildClipEditorItem(c, i)).join('')}
+        </div>
+        <button type="button" class="btn-new" onclick="addClipEditor()" style="width:fit-content">+ Add video clip</button>
+        <div style="font-size:12px;color:var(--gray2);margin-top:6px">These appear in the gallery alongside photos. Use unlisted YouTube URLs.</div>
+      </div>
     </div>
 
     ${isSeries ? `
@@ -2023,7 +2121,23 @@ function autoSlug() {
   }
 }
 
-function buildEpisodesEditor(episodes) {
+function buildClipEditorItem(clip, i) {
+  const url = clip.url || clip || '';
+  const title = clip.title || '';
+  return `
+    <div class="clip-editor-item" id="clip-editor-${i}" style="display:flex;gap:8px;align-items:center">
+      <input class="form-input clip-url" placeholder="https://www.youtube.com/watch?v=..." value="${url}" style="flex:1">
+      <input class="form-input clip-title" placeholder="Label (optional)" value="${title}" style="width:160px">
+      <button type="button" class="btn-sm del" onclick="document.getElementById('clip-editor-${i}').remove()" style="flex-shrink:0">✕</button>
+    </div>`;
+}
+
+function addClipEditor() {
+  const editor = document.getElementById('clips-editor');
+  const count = editor.querySelectorAll('.clip-editor-item').length;
+  const div = document.createElement('div');
+  div.innerHTML = buildClipEditorItem({ url: '', title: '' }, count + Date.now());
+  editor.appendChild(div.firstElementChild);
   return episodes.map((ep, i) => buildEpisodeEditorItem(ep, i)).join('');
 }
 
@@ -2167,6 +2281,14 @@ async function saveContentForm() {
       });
     }
 
+    // Collect video clips
+    const clips = [];
+    document.querySelectorAll('.clip-editor-item').forEach(el => {
+      const url = el.querySelector('.clip-url')?.value.trim();
+      const title = el.querySelector('.clip-title')?.value.trim();
+      if (url) clips.push({ url, title: title || '' });
+    });
+
     // Build item
     const newItem = {
       id: itemId,
@@ -2183,6 +2305,7 @@ async function saveContentForm() {
       poster: posterPath,
       featured: document.getElementById('cf-featured').checked,
       photos,
+      clips,
       ...(type === 'series' ? { episodes } : {}),
     };
 
