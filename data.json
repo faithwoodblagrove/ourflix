@@ -6,33 +6,5 @@
       "avatar": ""
     }
   ],
-  "content": [
-    {
-      "id": "test-mpi8po7t",
-      "type": "movie",
-      "title": "test",
-      "slug": "test-mpi8po7t",
-      "date": "1998-09-23",
-      "location": "London, UK",
-      "description": "SADLKFJSADFHJSHDJFH sdkbfksdbfbsdafhsdfsdaf",
-      "genre": "Adventure",
-      "duration": "1h 30 mins",
-      "cast": [
-        "Rodri and Faith"
-      ],
-      "videoUrl": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
-      "poster": "media/test-mpi8po7t/poster.jpeg",
-      "featured": true,
-      "photos": [
-        "media/test-mpi8po7t/foto-1779534195976-0.jpeg",
-        "media/test-mpi8po7t/foto-1779534197249-1.svg",
-        "media/test-mpi8po7t/foto-1779534198421-2.png",
-        "media/test-mpi8po7t/foto-1779534199697-3.jpg",
-        "media/test-mpi8po7t/foto-1779534200984-4.png",
-        "media/test-mpi8po7t/foto-1779534202796-5.jpeg",
-        "media/test-mpi8po7t/foto-1779534204100-6.webp",
-        "media/test-mpi8po7t/foto-1779534205800-7.png"
-      ]
-    }
-  ]
+  "content": []
 }
