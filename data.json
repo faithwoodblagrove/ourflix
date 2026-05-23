@@ -25,7 +25,13 @@
       "videoUrl": "https://www.youtube.com/watch?v=QipIufCH3rw&list=RDQipIufCH3rw&start_radio=1",
       "poster": "media/morocco-mpim3wo5/poster.jpeg",
       "featured": false,
-      "photos": [],
+      "photos": [
+        "media/morocco-mpim3wo5/foto-1779557462811-0.jpeg",
+        "media/morocco-mpim3wo5/foto-1779557465298-1.jpeg",
+        "media/morocco-mpim3wo5/foto-1779557467894-2.jpeg",
+        "media/morocco-mpim3wo5/foto-1779557470424-3.jpeg",
+        "media/morocco-mpim3wo5/foto-1779557473050-4.jpeg"
+      ],
       "clips": []
     }
   ]
