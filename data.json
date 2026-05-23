@@ -6,5 +6,27 @@
       "avatar": ""
     }
   ],
-  "content": []
+  "content": [
+    {
+      "id": "morocco-mpim3wo5",
+      "type": "movie",
+      "title": "Morocco 🇲🇦",
+      "slug": "morocco-mpim3wo5",
+      "date": "2025-05-17",
+      "location": "Marocco",
+      "description": "Our first trip together! From Marrakech to Taghazout, Sahara and much more….. Like Benguerir",
+      "genre": "Adventure, Romance, exploration",
+      "duration": "",
+      "cast": [
+        "Faith",
+        "Rodrigo",
+        "Street cats"
+      ],
+      "videoUrl": "https://www.youtube.com/watch?v=QipIufCH3rw&list=RDQipIufCH3rw&start_radio=1",
+      "poster": "media/morocco-mpim3wo5/poster.jpeg",
+      "featured": false,
+      "photos": [],
+      "clips": []
+    }
+  ]
 }
