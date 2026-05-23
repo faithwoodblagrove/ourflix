@@ -1312,6 +1312,33 @@ function fileToBase64(file) {
   });
 }
 
+// Compress & resize image before upload — max 2000px, quality 0.85
+// Keeps aspect ratio, reduces file size dramatically for large photos
+function compressImage(file, maxPx = 2000, quality = 0.85) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onerror = rej;
+    reader.onload = ev => {
+      const img = new Image();
+      img.onerror = rej;
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxPx || height > maxPx) {
+          if (width >= height) { height = Math.round(height * maxPx / width); width = maxPx; }
+          else { width = Math.round(width * maxPx / height); height = maxPx; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        res(dataUrl.split(',')[1]);
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function slugify(str) {
   return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-');
@@ -2264,7 +2291,7 @@ function handlePosterUpload(e) {
   document.getElementById('poster-filename').textContent = file.name;
   const reader = new FileReader();
   reader.onload = ev => {
-    window._pendingPoster = { base64: ev.target.result.split(',')[1], file, name: file.name };
+    window._pendingPoster = { file, name: file.name };
     document.getElementById('poster-preview').innerHTML =
       `<img src="${ev.target.result}" style="height:80px;border-radius:4px;margin-top:8px;object-fit:cover">`;
   };
@@ -2279,7 +2306,7 @@ function handleGalleryUpload(e) {
   files.forEach(file => {
     const reader = new FileReader();
     reader.onload = ev => {
-      window._pendingGallery.push({ base64: ev.target.result.split(',')[1], file, name: file.name });
+      window._pendingGallery.push({ file, name: file.name });
       const div = document.createElement('div');
       div.className = 'photo-preview-item';
       div.innerHTML = `<img src="${ev.target.result}" alt="">`;
@@ -2314,8 +2341,10 @@ async function saveContentForm() {
     let posterPath = isEdit ? (state.data.content?.find(c => c.id === id)?.poster || '') : '';
     if (window._pendingPoster) {
       const ext = window._pendingPoster.name.split('.').pop();
-      posterPath = `media/${slug}/poster.${ext}`;
-      await ghUploadBinary(posterPath, window._pendingPoster.base64, `Upload poster: ${title}`);
+      posterPath = `media/${slug}/poster.jpg`;
+      showProgress('gallery-upload-progress', 'gallery-progress-bar', 'gallery-progress-text', 10, 'Uploading poster...');
+      const compressed = await compressImage(window._pendingPoster.file, 1920);
+      await ghUploadBinary(posterPath, compressed, `Upload poster: ${title}`);
     }
 
     // Upload gallery photos
@@ -2325,15 +2354,25 @@ async function saveContentForm() {
     if (window._existingPhotosToDelete?.length) {
       photos = photos.filter(p => !window._existingPhotosToDelete.includes(p));
     }
-    // Upload new ones
+    // Upload new ones with compression and clear progress
     if (window._pendingGallery?.length) {
-      for (let i = 0; i < window._pendingGallery.length; i++) {
+      const total = window._pendingGallery.length;
+      for (let i = 0; i < total; i++) {
         const f = window._pendingGallery[i];
-        const ext = f.name.split('.').pop();
-        const photoPath = `media/${slug}/foto-${Date.now()}-${i}.${ext}`;
-        await ghUploadBinary(photoPath, f.base64, `Upload photo: ${title}`);
-        photos.push(photoPath);
+        const photoPath = `media/${slug}/foto-${Date.now()}-${i}.jpg`;
+        showProgress('gallery-upload-progress', 'gallery-progress-bar', 'gallery-progress-text',
+          Math.round((i / total) * 90),
+          `Uploading photo ${i+1} of ${total}...`);
+        try {
+          const compressed = await compressImage(f.file);
+          await ghUploadBinary(photoPath, compressed, `Upload photo: ${title} (${i+1}/${total})`);
+          photos.push(photoPath);
+        } catch (err) {
+          toast(`Error with photo ${i+1}: ${err.message}`, 'error');
+        }
       }
+      showProgress('gallery-upload-progress', 'gallery-progress-bar', 'gallery-progress-text',
+        100, `All ${total} photos uploaded ✓`);
     }
 
     // Build episodes if series
