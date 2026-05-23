@@ -6,34 +6,5 @@
       "avatar": ""
     }
   ],
-  "content": [
-    {
-      "id": "test2-mpiaisln",
-      "type": "movie",
-      "title": "test2",
-      "slug": "test2-mpiaisln",
-      "date": "",
-      "location": "",
-      "description": "",
-      "genre": "",
-      "duration": "",
-      "cast": [],
-      "videoUrl": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
-      "poster": "media/test2-mpiaisln/poster.jpeg",
-      "featured": false,
-      "photos": [
-        "media/test2-mpiaisln/foto-1779537234162-0.png",
-        "media/test2-mpiaisln/foto-1779537235228-1.jpg",
-        "media/test2-mpiaisln/foto-1779537236363-2.jpeg",
-        "media/test2-mpiaisln/foto-1779537237592-3.svg",
-        "media/test2-mpiaisln/foto-1779537238683-4.png",
-        "media/test2-mpiaisln/foto-1779537239775-5.jpg",
-        "media/test2-mpiaisln/foto-1779537241550-6.jpeg",
-        "media/test2-mpiaisln/foto-1779537243087-7.webp",
-        "media/test2-mpiaisln/foto-1779537244712-8.png",
-        "media/test2-mpiaisln/foto-1779537246535-9.png",
-        "media/test2-mpiaisln/foto-1779537248632-10.png"
-      ]
-    }
-  ]
+  "content": []
 }
