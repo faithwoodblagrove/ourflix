@@ -8,10 +8,10 @@
   ],
   "content": [
     {
-      "id": "test-mpiaf1v9",
+      "id": "test2-mpiaisln",
       "type": "movie",
-      "title": "test",
-      "slug": "test-mpiaf1v9",
+      "title": "test2",
+      "slug": "test2-mpiaisln",
       "date": "",
       "location": "",
       "description": "",
@@ -19,23 +19,20 @@
       "duration": "",
       "cast": [],
       "videoUrl": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
-      "poster": "media/test-mpiaf1v9/poster.jpg",
-      "featured": true,
+      "poster": "media/test2-mpiaisln/poster.jpeg",
+      "featured": false,
       "photos": [
-        "media/test-mpiaf1v9/foto-1779537059855-0.png",
-        "media/test-mpiaf1v9/foto-1779537061034-1.svg",
-        "media/test-mpiaf1v9/foto-1779537062178-2.jpg",
-        "media/test-mpiaf1v9/foto-1779537063421-3.jpeg",
-        "media/test-mpiaf1v9/foto-1779537065043-4.jpeg",
-        "media/test-mpiaf1v9/foto-1779537066515-5.png",
-        "media/test-mpiaf1v9/foto-1779537067604-6.jpeg",
-        "media/test-mpiaf1v9/foto-1779537069141-7.jpg",
-        "media/test-mpiaf1v9/foto-1779537070375-8.webp",
-        "media/test-mpiaf1v9/foto-1779537072531-9.png",
-        "media/test-mpiaf1v9/foto-1779537074438-10.webp",
-        "media/test-mpiaf1v9/foto-1779537076106-11.png",
-        "media/test-mpiaf1v9/foto-1779537078208-12.jpg",
-        "media/test-mpiaf1v9/foto-1779537080915-13.png"
+        "media/test2-mpiaisln/foto-1779537234162-0.png",
+        "media/test2-mpiaisln/foto-1779537235228-1.jpg",
+        "media/test2-mpiaisln/foto-1779537236363-2.jpeg",
+        "media/test2-mpiaisln/foto-1779537237592-3.svg",
+        "media/test2-mpiaisln/foto-1779537238683-4.png",
+        "media/test2-mpiaisln/foto-1779537239775-5.jpg",
+        "media/test2-mpiaisln/foto-1779537241550-6.jpeg",
+        "media/test2-mpiaisln/foto-1779537243087-7.webp",
+        "media/test2-mpiaisln/foto-1779537244712-8.png",
+        "media/test2-mpiaisln/foto-1779537246535-9.png",
+        "media/test2-mpiaisln/foto-1779537248632-10.png"
       ]
     }
   ]
